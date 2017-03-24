@@ -1,6 +1,6 @@
-import {MotionScene} from './scenes/default';
+import {MotionScene} from './scenes/scene';
 
-// ln -s ./../node_modules/babylonjs/babylon.js ./release/babylon.js
+
 declare const BABYLON: any;
 
 
