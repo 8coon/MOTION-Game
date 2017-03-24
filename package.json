@@ -1,0 +1,27 @@
+{
+    "name": "sample",
+    "version": "1.0.0",
+    "description": "Sample Application",
+    "main": "./server.js",
+    "license": "MIT",
+    "scripts": {
+        "start": "tsc && node ./node_modules/webpack/bin/webpack.js && node ./server.js"
+    },
+    "dependencies": {
+        "typescript": "latest",
+        "webpack": "latest",
+        "awesome-typescript-loader": "latest",
+        "source-map-loader": "latest",
+        "jasmine": "latest",
+        "testem": "latest",
+        "sass-loader": "latest",
+        "node-sass": "latest",
+        "style-loader": "latest",
+        "html-loader": "latest",
+        "extract-loader": "latest",
+        "file-loader": "latest",
+        "css-loader": "latest",
+        "extract-text-webpack-plugin": "latest",
+        "babylonjs": "latest"
+    }
+}

@@ -1,0 +1,35 @@
+<!DOCTYPE html><html><head>
+    <meta charset="UTF-8">
+    <title>Sample Application</title>
+
+    <!-- JSWorks import -->
+    <!-- JSWorks import end -->
+
+    <script src="/application.js"></script>
+    <link rel="stylesheet" href="/main.css">
+    <link rel="import" href="/main.html">
+
+
+</head>
+<body>
+
+    <app-info>
+        <app-controllers>
+
+            <!-- Define your controllers here -->
+            <!-- <app-controller id="SampleController" view="SampleView"></app-controller> -->
+
+        <app-controller id="SampleController" view="SampleView"></app-controller></app-controllers>
+
+        <app-routes mode="hash">
+
+            <!-- Define your routes here -->
+            <!-- <app-route id="SampleRoute" controller="SampleController" match="route"></app-route>
+            <!-- App routes can be nested -->
+
+        <app-route id="SampleRoute" controller="SampleController" match="sample"></app-route></app-routes>
+    </app-info>
+
+    <app-main></app-main>
+
+</body></html>
