@@ -10,6 +10,7 @@ const app = express();
 app.use('/', express.static(`${__dirname}/dist`));
 app.use('/game', express.static(`${__dirname}/game`));
 app.use('/babylonjs', express.static(`${__dirname}/node_modules/babylonjs`));
+app.use('/jsworks', express.static(`${__dirname}/node_modules/jsworks/dist`));
 
 
 app.get('/', (req,res) => {

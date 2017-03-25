@@ -22,6 +22,7 @@
         "file-loader": "latest",
         "css-loader": "latest",
         "extract-text-webpack-plugin": "latest",
-        "babylonjs": "latest"
+        "babylonjs": "latest",
+        "jsworks": "git://github.com/8coon/next.git"
     }
 }
