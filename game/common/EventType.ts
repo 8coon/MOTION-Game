@@ -5,4 +5,5 @@ export enum EventType {
     MESHES_FAIL,
     RENDER,
     JOYSTICK_MOVE,
+    JOYSTICK_PRESS,
 }

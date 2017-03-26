@@ -61,14 +61,9 @@ class Game {
 
 
     public onClick(event) {
-        this.pointerLocked = !this.pointerLocked;
-
-        if (!this.pointerLocked) {
-            document.exitPointerLock();
-            return;
-        }
-
+        this.pointerLocked = true;
         this.canvas.requestPointerLock();
+        (<any> this.scene).emitEvent({ type: EventType.JOYSTICK_PRESS });
     }
 
 
@@ -91,6 +86,16 @@ class Game {
 
 
     public onKeyDown(event) {
+        if (event.keyCode === "L".charCodeAt(0)) {
+            this.pointerLocked = !this.pointerLocked;
+
+            if (!this.pointerLocked) {
+                document.exitPointerLock();
+                return;
+            }
+
+            this.canvas.requestPointerLock();
+        }
     }
 
 

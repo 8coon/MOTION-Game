@@ -2,6 +2,7 @@ import {INewable} from '../common/INewable';
 import {Entity} from '../entity/entity';
 import {IControllable} from '../entity/IControllable';
 import {EventType} from '../common/EventType';
+import {BulletManager} from '../entity/BulletManager';
 
 
 declare const BABYLON;
@@ -18,19 +19,18 @@ export class MotionScene extends (<INewable> BABYLON.Scene) {
 
     private loader;
     public currentInput: IControllable;
+    public bulletManager: BulletManager;
 
 
     constructor(engine) {
         super(engine);
         engine.enableOfflineSupport = false;
+        this.bulletManager = new BulletManager(this);
 
         JSWorks.EventManager.subscribe(this, this, EventType.JOYSTICK_MOVE,
-            (event, emitter) => { this.onJoystickMove(event, emitter); });
-    }
-
-
-    public onJoystickMove(event, emitter) {
-        this.currentInput.joystickMoved(event.data.x, event.data.y);
+            (event, emitter) => { this.currentInput.joystickMoved(event.data.x, event.data.y); });
+        JSWorks.EventManager.subscribe(this, this, EventType.JOYSTICK_PRESS,
+            (event, emitter) => { this.currentInput.joystickPressed(); });
     }
 
 

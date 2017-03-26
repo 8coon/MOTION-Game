@@ -21,6 +21,10 @@ export class Entity extends (<INewable> BABYLON.Mesh) implements IControllable {
 
     public speed: number = 0.1;
 
+    private angleX: number = 0;
+    private angleY: number = 0;
+    private direction: any;
+
 
     constructor(name: string, scene: MotionScene) {
         super(name, scene);
@@ -75,6 +79,7 @@ export class Entity extends (<INewable> BABYLON.Mesh) implements IControllable {
         );
         this.joystick.parent = this;
         this.joystick.position = new BABYLON.Vector3(0, 0, 5);
+        this.joystick.isVisible = false;
 
         this.target = new BABYLON.Mesh.CreateBox(
             MotionScene.descendantName((<any> this).name, 'ship'),
@@ -86,7 +91,7 @@ export class Entity extends (<INewable> BABYLON.Mesh) implements IControllable {
 
         this.light = new BABYLON.HemisphericLight(
             MotionScene.descendantName((<any> this).name, 'light'),
-            new BABYLON.Vector3(0, 0, 0),
+            new BABYLON.Vector3(0, 5, 1),
             (<any> this).getScene()
         );
         this.light.parent = this;
@@ -99,15 +104,15 @@ export class Entity extends (<INewable> BABYLON.Mesh) implements IControllable {
     }
 
 
-    private static getTranslationMatrix(node) {
+    private static getTranslationMatrix(node, mul?, scaling?, position?, rotation?) {
         return BABYLON.Matrix.Compose(
-            node.scaling,
+            scaling || (node || {}).scaling || new BABYLON.Vector3(1, 1, 1),
             BABYLON.Quaternion.RotationYawPitchRoll(
-                node.rotation.y,
-                node.rotation.x,
-                node.rotation.z,
+                rotation || ((node || {}).rotation || {}).y || 0,
+                rotation || ((node || {}).rotation || {}).x || 0,
+                rotation || ((node || {}).rotation || {}).z || 0,
             ),
-            node.position,
+            (position || (node || {}).position || BABYLON.Vector3.Zero()).scale(mul || 1),
         );
     }
 
@@ -116,25 +121,36 @@ export class Entity extends (<INewable> BABYLON.Mesh) implements IControllable {
         const xMatrix = Entity.getTranslationMatrix(this.shipHolderX);
         const zMatrix = Entity.getTranslationMatrix(this.shipHolderZ);
 
-        let direction = new BABYLON.Vector3(0, 0, modifier * this.speed);
-        direction = BABYLON.Vector3.TransformCoordinates(direction, xMatrix);
-        direction = BABYLON.Vector3.TransformCoordinates(direction, zMatrix);
+        this.direction = new BABYLON.Vector3(0, 0, modifier * this.speed);
+        // direction.addInPlace(new BABYLON.Vector3(0, this.joystick.position.y / 4 * 0.5, 0));
 
-        (<any> this).position.x += direction.x;// * this.speed;
-        (<any> this).position.y += direction.y;// * this.speed;
-        (<any> this).position.z += direction.z;// * this.speed;
+        this.direction = BABYLON.Vector3.TransformCoordinates(this.direction, xMatrix);
+        this.direction = BABYLON.Vector3.TransformCoordinates(this.direction, zMatrix);
+
+        (<any> this).position.x += this.direction.x;// * this.speed;
+        (<any> this).position.y += this.direction.y;// * this.speed;
+        (<any> this).position.z += this.direction.z;// * this.speed;
+    }
+
+
+    public static acos(angle: number) {
+        angle = (angle < -1) ? -1 : angle;
+        angle = (angle > 1) ? 1 : angle;
+
+        return Math.acos(angle);
     }
 
 
     public onRender(event, emitter) {
-        const cosAngleY = this.joystick.position.y / this.joystick.position.z;
-        let cosAngleX = this.joystick.position.x / this.joystick.position.z;
-        cosAngleX *= 1.1;
+        this.angleY = Entity.acos(-(this.joystick.position.y / this.joystick.position.z));
+        this.angleX = Entity.acos( (this.joystick.position.x / this.joystick.position.z) * 1.3);
 
-        this.shipHolderX.rotation.x = Entity.slowMo(this.shipHolderX.rotation.x, Math.PI / 2 - Math.acos(-cosAngleY));
-        this.shipHolderZ.rotation.z = Entity.slowMo(this.shipHolderZ.rotation.z, -Math.PI / 2 + Math.acos(cosAngleX));
+        this.shipHolderX.rotation.x = Entity.slowMo(
+            this.shipHolderX.rotation.x,  Math.PI / 2 - this.angleY);
+        this.shipHolderZ.rotation.z = Entity.slowMo(
+            this.shipHolderZ.rotation.z, -Math.PI / 2 + this.angleX);
 
-        this.calculateMovement(2);
+        this.calculateMovement(1);
     }
 
 
@@ -150,7 +166,17 @@ export class Entity extends (<INewable> BABYLON.Mesh) implements IControllable {
         this.joystick.position.x +=  x * 0.01;
         this.joystick.position.y += -y * 0.01;
 
-        Entity.limitTarget(this.joystick.position, 4.5, 3.5);
+        Entity.limitTarget(this.joystick.position, 4, 4);
+    }
+
+
+    public joystickPressed() {
+        (<any> this).getScene().bulletManager.fire(
+            this.ship.getAbsolutePosition(),
+            this.direction,
+            this.speed + 10,
+            100,
+        );
     }
 
 

@@ -5,6 +5,7 @@ export interface IControllable {
 
     speed: number;
     joystickMoved(x: number, y: number);
+    joystickPressed();
 
 }
 
