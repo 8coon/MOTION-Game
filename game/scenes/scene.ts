@@ -23,6 +23,14 @@ export class MotionScene extends (<INewable> BABYLON.Scene) {
     constructor(engine) {
         super(engine);
         engine.enableOfflineSupport = false;
+
+        JSWorks.EventManager.subscribe(this, this, EventType.JOYSTICK_MOVE,
+            (event, emitter) => { this.onJoystickMove(event, emitter); });
+    }
+
+
+    public onJoystickMove(event, emitter) {
+        this.currentInput.joystickMoved(event.data.x, event.data.y);
     }
 
 

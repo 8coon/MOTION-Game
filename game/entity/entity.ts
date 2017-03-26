@@ -71,7 +71,8 @@ export class Entity extends (<INewable> BABYLON.Mesh) implements IControllable {
 
 
     public joystickMoved(x: number, y: number) {
-
+        this.target.position.x +=  x * 0.01;
+        this.target.position.y += -y * 0.01;
     }
 
 

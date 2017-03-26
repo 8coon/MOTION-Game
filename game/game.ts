@@ -1,4 +1,5 @@
 import {MotionScene} from './scenes/scene';
+import {EventType} from "./common/EventType";
 
 
 declare const BABYLON: any;
@@ -31,6 +32,7 @@ class Game {
             resize: this.onResize,
             mousemove: this.onPointerMove,
             keydown: this.onKeyDown,
+            click: this.onClick,
 
             pointerlockchange: this.onPointerLockChange,
             mozpointerlockchange: this.onPointerLockChange,
@@ -43,6 +45,7 @@ class Game {
         this.scene.init();
         this.initEventListeners();
         this.initCanvasPointerLock();
+        this.canvas.requestPointerLock();
     }
 
 
@@ -58,9 +61,21 @@ class Game {
     }
 
 
+    public onClick(event) {
+        this.pointerLocked = !this.pointerLocked;
+
+        if (!this.pointerLocked) {
+            document.exitPointerLock();
+            return;
+        }
+
+        this.canvas.requestPointerLock();
+    }
+
+
     public onPointerMove(event) {
         if (!this.lastMousePos) {
-            this.lastMousePos = { x: event.screenX, y: event.screenY, };
+            this.lastMousePos = { x: event.screenX, y: event.screenY };
             return;
         }
 
@@ -68,21 +83,15 @@ class Game {
         const diffX = event.movementX || this.lastMousePos.x - curMousePos.x;
         const diffY = event.movementY || this.lastMousePos.y - curMousePos.y;
 
-        console.log(diffX, diffY);
+        if (this.pointerLocked) {
+            (<any> this.scene).emitEvent({ type: EventType.JOYSTICK_MOVE, data: { x: diffX, y: diffY } });
+        }
 
         this.lastMousePos = curMousePos;
     }
 
 
     public onKeyDown(event) {
-        if (event.keyCode === "L".charCodeAt(0)) {
-            if (this.pointerLocked) {
-                document.exitPointerLock();
-                return;
-            }
-
-            this.canvas.requestPointerLock();
-        }
     }
 
 
