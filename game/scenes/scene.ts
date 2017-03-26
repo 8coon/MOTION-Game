@@ -40,6 +40,11 @@ export class MotionScene extends (<INewable> BABYLON.Scene) {
         this.player = new Entity('player', this);
         this.currentInput = this.player;
 
+        const ground = BABYLON.Mesh.CreateGround('ground', 1000, 1000, 50, this);
+        ground.position.y = -10;
+        ground.material = new BABYLON.StandardMaterial('ground', this);
+        ground.material.wireframe = true;
+
         this.loader.load();
     }
 

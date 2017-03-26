@@ -45,7 +45,6 @@ class Game {
         this.scene.init();
         this.initEventListeners();
         this.initCanvasPointerLock();
-        this.canvas.requestPointerLock();
     }
 
 
