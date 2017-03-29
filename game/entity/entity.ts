@@ -19,7 +19,7 @@ export class Entity extends (<INewable> BABYLON.Mesh) implements IControllable {
     public joystick: any;
     public target: any;
 
-    public speed: number = 0.1;
+    public speed: number = 0.2;
 
     private angleX: number = 0;
     private angleY: number = 0;
@@ -29,7 +29,7 @@ export class Entity extends (<INewable> BABYLON.Mesh) implements IControllable {
     constructor(name: string, scene: MotionScene) {
         super(name, scene);
 
-        scene.queueMesh(this.modelName, '/game/assets/models/', 'spaceship.obj');
+        scene.meshesLoader.queue(this.modelName, '/game/assets/models/', 'spaceship.obj');
 
         JSWorks.EventManager.subscribe(this, scene, EventType.MESHES_LOAD,
             (event, emitter) => { this.onMeshesLoaded(event, emitter); });
@@ -55,7 +55,7 @@ export class Entity extends (<INewable> BABYLON.Mesh) implements IControllable {
         this.shipHolderX.parent = this.shipHolderZ;
         this.shipHolderX.isVisible = false;
 
-        this.ship = (<any> this).getScene().getLoadedMesh(this.modelName);
+        this.ship = (<any> this).getScene().meshesLoader.retrieve(this.modelName);
         this.ship = this.ship.clone(MotionScene.descendantName((<any> this).name, 'ship'));
         this.ship.parent = this.shipHolderX;
         this.ship.scaling = new BABYLON.Vector3(0.1, 0.1, 0.1);

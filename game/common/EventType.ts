@@ -2,7 +2,13 @@
 
 export enum EventType {
     MESHES_LOAD,
+    SHADERS_LOAD,
+    LOAD_SUCCESS,
+    LOAD_FAIL,
+
     MESHES_FAIL,
+    SHADERS_FAIL,
+
     RENDER,
     JOYSTICK_MOVE,
     JOYSTICK_PRESS,

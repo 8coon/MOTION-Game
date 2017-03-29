@@ -3,6 +3,8 @@ import {Entity} from '../entity/entity';
 import {IControllable} from '../entity/IControllable';
 import {EventType} from '../common/EventType';
 import {BulletManager} from '../entity/BulletManager';
+import {Loader} from "../common/Loader";
+import {Skydome} from "../sky/skydome";
 
 
 declare const BABYLON;
@@ -12,10 +14,12 @@ declare const JSWorks;
 export class MotionScene extends (<INewable> BABYLON.Scene) {
 
     private player: Entity;
-    private meshesCount: number = 0;
-    private meshesLoaded: number = 0;
-    private meshesError: boolean = false;
-    private meshesHash: object = {};
+    private skydome: Skydome;
+
+    public meshesLoader: Loader;
+    public shadersLoader: Loader;
+    private loadersCount: number = 0;
+    private loadersFired: number = 0;
 
     private loader;
     public currentInput: IControllable;
@@ -34,49 +38,75 @@ export class MotionScene extends (<INewable> BABYLON.Scene) {
     }
 
 
+    public initMeshesLoader() {
+        this.meshesLoader = new Loader(this.loader);
+        this.loadersCount++;
+
+        this.meshesLoader.taskAdder = (self, name, root, file) => {
+            return self.loader.addMeshTask(name, '', root, file);
+        };
+
+        this.meshesLoader.resultGetter = (self, task) => {
+            task.loadedMeshes[0].setEnabled(false);
+            return task.loadedMeshes[0];
+        };
+
+        JSWorks.EventManager.subscribe(this, this.meshesLoader, EventType.LOAD_SUCCESS,
+            () => { this.onLoaderSuccess(); })
+    }
+
+
+    public initShadersLoader() {
+        this.shadersLoader = new Loader(this.loader);
+        this.loadersCount++;
+
+        this.shadersLoader.taskAdder = (self, name, root, file) => {
+            return self.loader.addTextFileTask(name, `${root}/${file}`);
+        };
+
+        this.shadersLoader.resultGetter = (self, task) => {
+            BABYLON.Effect.ShadersStore[task.name] = task.text;
+            return task.text;
+        };
+
+        JSWorks.EventManager.subscribe(this, this.shadersLoader, EventType.LOAD_SUCCESS,
+            () => { this.onLoaderSuccess(); })
+    }
+
+
+    public onLoaderSuccess() {
+        this.loadersFired++;
+
+        if (this.loadersCount === this.loadersFired) {
+            [EventType.MESHES_LOAD, EventType.SHADERS_LOAD].forEach((type) => {
+                (<any> this).emitEvent({ type: type });
+            });
+
+            this.run();
+        }
+    }
+
+
     public init() {
         this.loader = new BABYLON.AssetsManager(this);
+
+        this.initMeshesLoader();
+        this.initShadersLoader();
 
         this.player = new Entity('player', this);
         this.currentInput = this.player;
 
-        const ground = BABYLON.Mesh.CreateGround('ground', 1000, 1000, 50, this);
+        this.skydome = new Skydome('skydome', this);
+        (<any> this.skydome).position.z = 100;
+
+        const ground = BABYLON.Mesh.CreateGround('ground', 5000, 5000, 250, this);
         ground.position.y = -10;
         ground.material = new BABYLON.StandardMaterial('ground', this);
         ground.material.wireframe = true;
 
         this.loader.load();
-    }
-
-
-    public queueMesh(name, root, file) {
-        if (this.meshesHash[name]) {
-            return;
-        }
-
-        const task = this.loader.addMeshTask(name, '', root, file);
-        this.meshesHash[name] = true;
-        this.meshesCount++;
-
-        task.onSuccess = (task) => {
-            this.meshesLoaded++;
-            this.meshesHash[name] = task.loadedMeshes[0];
-            this.meshesHash[name].setEnabled(false);
-
-            if ((this.meshesLoaded === this.meshesCount) && !this.meshesError) {
-                (<any> this).emitEvent({ type: EventType.MESHES_LOAD });
-                this.run();
-            }
-        };
-
-        task.onError = (task) => {
-            this.meshesError = true;
-            this.meshesHash = {};
-            this.meshesLoaded = 0;
-            this.meshesCount = 0;
-
-            (<any> this).emitEvent({ type: EventType.MESHES_FAIL });
-        }
+        this.meshesLoader.load();
+        this.shadersLoader.load();
     }
 
 
@@ -88,11 +118,6 @@ export class MotionScene extends (<INewable> BABYLON.Scene) {
             (<any> this).emitEvent({ type: EventType.RENDER });
             (<any> this).render();
         });
-    }
-
-
-    public getLoadedMesh(name: string) {
-        return this.meshesHash[name];
     }
 
 
