@@ -86,22 +86,31 @@ void main(void)
 		gl_FragCoord.y * scale - t * 0.2
 	));
 
-	float stars = cnoise(vec2(
+	float stars1 = cnoise(vec2(
 		gl_FragCoord.x * 0.3,
 		gl_FragCoord.y * 0.3
 	)) * 0.65;
 
-	stars = 0.1 - cubic_bezier(stars, vec4(1.0, 1.34, 0.76, -0.35));
-	if (stars < 0.5) stars = 0.0;
+	stars1 = 0.1 - cubic_bezier(stars1, vec4(1.0, 1.34, 0.76, -0.35));
+	if (stars1 < 0.5) stars1 = 0.0;
+
+	float stars2 = cnoise(vec2(
+		gl_FragCoord.x * 0.3 + 10000.0,
+		gl_FragCoord.y * 0.3 + 10000.0
+	)) * 0.65;
+
+	stars2 = 0.1 - cubic_bezier(stars2, vec4(1.0, 1.34, 0.76, -0.35));
+	if (stars2 < 0.5) stars2 = 0.0;
+	stars2 *= 0.5;
 
 	vec3 color1 = vec3(124.0 / 255.0, 49.0  / 255.0, 86.0  / 255.0);
 	vec3 color2 = vec3(25.0  / 255.0, 72.0  / 255.0, 108.0 / 255.0);
 	vec3 color3 = vec3(160.0 / 255.0, 187.0 / 255.0, 208.0 / 255.0);
 
 	vec3 color = correct(vec3(
-		first * val1 * color1.r + second * val2 * color2.r + flicker * stars * color3.r,
-		first * val1 * color1.g + second * val2 * color2.g + flicker * stars * color3.g,
-		first * val1 * color1.b + second * val2 * color2.b + flicker * stars * color3.b
+		first * val1 * color1.r + second * val2 * color2.r + flicker * stars1 * color3.r + flicker * stars2 * color3.r,
+		first * val1 * color1.g + second * val2 * color2.g + flicker * stars1 * color3.g + flicker * stars2 * color3.g,
+		first * val1 * color1.b + second * val2 * color2.b + flicker * stars1 * color3.b + flicker * stars2 * color3.b
 	));
 
 	gl_FragColor = vec4(color.r, color.g, color.b, 1.0);
