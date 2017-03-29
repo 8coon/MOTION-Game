@@ -114,6 +114,15 @@ export class MotionScene extends (<INewable> BABYLON.Scene) {
         (<any> this).setActiveCameraByName(this.player.camera.name);
         this.player.camera.attachControl((<any> this).getEngine().getRenderingCanvas(), true);
 
+        (<any> this).meshes.forEach((mesh) => {
+            if (mesh.__skybox__) {
+                mesh.renderingGroupId = 0;
+                return;
+            }
+
+            mesh.renderingGroupId = 1;
+        });
+
         (<any> this).getEngine().runRenderLoop(() => {
             (<any> this).emitEvent({ type: EventType.RENDER });
             (<any> this).render();

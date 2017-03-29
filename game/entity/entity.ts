@@ -150,6 +150,8 @@ export class Entity extends (<INewable> BABYLON.Mesh) implements IControllable {
         this.shipHolderZ.rotation.z = Entity.slowMo(
             this.shipHolderZ.rotation.z, -Math.PI / 2 + this.angleX);
 
+        (<any> this).rotation.x = Entity.slowMo((<any> this).rotation.x, this.shipHolderX.rotation.x);
+
         this.calculateMovement(1);
     }
 
