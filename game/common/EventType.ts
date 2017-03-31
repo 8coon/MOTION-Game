@@ -12,4 +12,6 @@ export enum EventType {
     RENDER,
     JOYSTICK_MOVE,
     JOYSTICK_PRESS,
+
+    MAP_ENDS,
 }
