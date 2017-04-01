@@ -5,6 +5,7 @@ import {EventType} from '../common/EventType';
 import {BulletManager} from '../entity/BulletManager';
 import {Loader} from "../common/Loader";
 import {Skydome} from "../sky/skydome";
+import {Map} from "../map/map";
 
 
 declare const BABYLON;
@@ -16,6 +17,8 @@ export class MotionScene extends (<INewable> BABYLON.Scene) {
     private player: Entity;
     private skydome: Skydome;
 
+    private map: Map;
+
     public meshesLoader: Loader;
     public shadersLoader: Loader;
     private loadersCount: number = 0;
@@ -26,10 +29,13 @@ export class MotionScene extends (<INewable> BABYLON.Scene) {
     public bulletManager: BulletManager;
 
 
+    private last_position: number = 0;
+
     constructor(engine) {
         super(engine);
         engine.enableOfflineSupport = false;
         this.bulletManager = new BulletManager(this);
+        this.map = new Map('motion-map', this);
 
         JSWorks.EventManager.subscribe(this, this, EventType.JOYSTICK_MOVE,
             (event, emitter) => { this.currentInput.joystickMoved(event.data.x, event.data.y); });
@@ -102,10 +108,12 @@ export class MotionScene extends (<INewable> BABYLON.Scene) {
         this.skydome = new Skydome('skydome', this);
         (<any> this.skydome).position.z = 100;
 
-        const ground = BABYLON.Mesh.CreateGround('ground', 5000, 5000, 250, this);
-        ground.position.y = -10;
-        ground.material = new BABYLON.StandardMaterial('ground', this);
-        ground.material.wireframe = true;
+        this.map.loadChunks();
+        this.map.initRandomChunk(new BABYLON.Vector3(0, -10, 0));
+        // const ground = BABYLON.Mesh.CreateGround('ground', 5000, 5000, 250, this);
+        // ground.position.y = -10;
+        // ground.material = new BABYLON.StandardMaterial('ground', this);
+        // ground.material.wireframe = true;
 
         this.loader.load();
         this.meshesLoader.load();
@@ -139,8 +147,17 @@ export class MotionScene extends (<INewable> BABYLON.Scene) {
 
     public onMapEnds(): void {
         let position = this.player.getCurrentPosition();
-        if (position.x > 200 || position.y > 200) {
-            (<any> this).emitEvent({type: EventType.MAP_ENDS, data: this.player.getCurrentPosition()});
+        // console.log(position);
+        const map_end = position.z - this.last_position;
+        // console.log(map_end);
+        if (map_end > 120) {
+            console.log(position);
+            (<any> this).emitEvent({type: EventType.MAP_ENDS, data: position});
+            this.last_position = position.z;
         }
+    }
+
+    public getPlayer(): Entity {
+        return this.player;
     }
 }

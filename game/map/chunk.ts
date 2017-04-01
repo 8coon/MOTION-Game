@@ -8,6 +8,7 @@ declare const JSWorks;
 export class Chunk extends (<INewable> BABYLON.Mesh) {
 
     private scene: MotionScene;
+    public ground: any;
 
     constructor(name: string, scene: MotionScene) {
         super(name, scene);
@@ -18,19 +19,22 @@ export class Chunk extends (<INewable> BABYLON.Mesh) {
         return this.scene;
     }
 
-    public init(x: number, y: number) {
-        const ground = BABYLON.Mesh.CreateGround('ground', 5000, 5000, 250, this.scene);
-        ground.position.y = -10;
-        ground.material = new BABYLON.StandardMaterial('ground', this.scene);
+    public init(position: {x: number, y: number, z: number}) {
+        this.ground = BABYLON.Mesh.CreateGround('ground', 300, 300, 250, this.scene);
+        this.ground.position.x = position.x;
+        this.ground.position.z = position.z;
+        this.ground.position.y = -10;
+        this.ground.material = new BABYLON.StandardMaterial('ground', this.scene);
         if (this.name === "red") {
-            ground.material.diffuseColor = new BABYLON.Color3(1.0, 0.0, 0.0);
+            this.ground.material.diffuseColor = new BABYLON.Color3(1.0, 0.0, 0.0);
         }
         if (this.name === "green") {
-            ground.material.diffuseColor = new BABYLON.Color3(0.0, 1.0, 0.0);
+            this.ground.material.diffuseColor = new BABYLON.Color3(0.0, 1.0, 0.0);
         }
         if (this.name === "blue") {
-            ground.material.diffuseColor = new BABYLON.Color3(0.0, 0.0, 1.0);
+            this.ground.material.diffuseColor = new BABYLON.Color3(0.0, 0.0, 1.0);
         }
-        ground.material.wireframe = true;
+        this.ground.material.wireframe = true;
+        console.log(this.ground);
     }
 }

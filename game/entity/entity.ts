@@ -181,8 +181,8 @@ export class Entity extends (<INewable> BABYLON.Mesh) implements IControllable {
         );
     }
 
-    public getCurrentPosition(): {x: number, y: number} {
-        return {x: this.ship.getAbsolutePosition().x, y: this.ship.getAbsolutePosition().y};
+    public getCurrentPosition() {
+        return this.ship.getAbsolutePosition();
     }
 
 
