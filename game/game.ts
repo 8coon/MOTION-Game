@@ -111,8 +111,6 @@ class Game {
         this.pointerLocked = true;
     }
 
-
-
     private initCanvas(res?: IResolution) {
         let canvasSize = { height: '100%', width: '100%' };
 

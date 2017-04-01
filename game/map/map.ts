@@ -19,8 +19,12 @@ export class Map extends (<INewable> BABYLON.Mesh) {
 
         this.loadChunks();
 
-        JSWorks.EventManager.subscribe(this, this, EventType.MAP_ENDS,
+        JSWorks.EventManager.subscribe(this, this.scene, EventType.MAP_ENDS,
             (event, emiter) => { this.initRandomChunk(event.data.x, event.data.y) })
+    }
+
+    public getScene(): MotionScene {
+        return this.scene;
     }
 
     public loadChunks(): void {
@@ -29,7 +33,9 @@ export class Map extends (<INewable> BABYLON.Mesh) {
 
     public initRandomChunk(x: number, y:number): void {
         this.chunks[this.counter].init(x, y);
+        this.counter++;
     }
+
 
 
 }

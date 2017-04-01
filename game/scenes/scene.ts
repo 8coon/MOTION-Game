@@ -35,6 +35,9 @@ export class MotionScene extends (<INewable> BABYLON.Scene) {
             (event, emitter) => { this.currentInput.joystickMoved(event.data.x, event.data.y); });
         JSWorks.EventManager.subscribe(this, this, EventType.JOYSTICK_PRESS,
             (event, emitter) => { this.currentInput.joystickPressed(); });
+
+        JSWorks.EventManager.subscribe(this, this, EventType.RENDER,
+            (event, emiter) => { this.onMapEnds(); });
     }
 
 
@@ -134,5 +137,10 @@ export class MotionScene extends (<INewable> BABYLON.Scene) {
         return `${parentName}__${name}`;
     }
 
-
+    public onMapEnds(): void {
+        let position = this.player.getCurrentPosition();
+        if (position.x > 200 || position.y > 200) {
+            (<any> this).emitEvent({type: EventType.MAP_ENDS, data: this.player.getCurrentPosition()});
+        }
+    }
 }

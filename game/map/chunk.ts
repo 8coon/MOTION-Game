@@ -14,6 +14,10 @@ export class Chunk extends (<INewable> BABYLON.Mesh) {
         this.scene = scene;
     }
 
+    public getScene(): MotionScene {
+        return this.scene;
+    }
+
     public init(x: number, y: number) {
         const ground = BABYLON.Mesh.CreateGround('ground', 5000, 5000, 250, this.scene);
         ground.position.y = -10;
