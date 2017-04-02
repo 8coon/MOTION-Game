@@ -29,13 +29,16 @@ export class MotionScene extends (<INewable> BABYLON.Scene) {
     public bulletManager: BulletManager;
 
 
-    private last_position: number = 0;
+    private last_position: number;
 
     constructor(engine) {
         super(engine);
         engine.enableOfflineSupport = false;
         this.bulletManager = new BulletManager(this);
         this.map = new Map('motion-map', this);
+        // this.last_position = - this.map.chunkSize.height / 2;
+        this.last_position =0 ;
+        console.log("last", this.last_position);
 
         JSWorks.EventManager.subscribe(this, this, EventType.JOYSTICK_MOVE,
             (event, emitter) => { this.currentInput.joystickMoved(event.data.x, event.data.y); });
@@ -111,6 +114,7 @@ export class MotionScene extends (<INewable> BABYLON.Scene) {
         this.map.loadChunks();
         // this.map.initRandomChunk();
         this.map.initStartChunk();
+        // this.last_position = - this.map.chunkSize.height / 2;
         // const ground = BABYLON.Mesh.CreateGround('ground', 5000, 5000, 250, this);
         // ground.position.y = -10;
         // ground.material = new BABYLON.StandardMaterial('ground', this);
@@ -148,10 +152,11 @@ export class MotionScene extends (<INewable> BABYLON.Scene) {
 
     public onMapEnds(): void {
         let shipPosition = this.player.getCurrentPosition();
-        // let blockPosition = this.map.currentChunkPos;
-        // console.log(shipPosition);
+        console.log(shipPosition);
         const map_end = shipPosition.z - this.last_position;
-        if (map_end > 300) {
+        // console.log(map_end);
+        // console.log(this.map.lastBlock)
+        if (map_end > this.map.chunkSize.height) {
             let potentialArea = {
                 leftDown: {x: shipPosition.x - this.map.potentialArea.side / 2,
                     z: shipPosition.z,},
