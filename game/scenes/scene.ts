@@ -109,7 +109,8 @@ export class MotionScene extends (<INewable> BABYLON.Scene) {
         (<any> this.skydome).position.z = 100;
 
         this.map.loadChunks();
-        this.map.initRandomChunk(new BABYLON.Vector3(0, -10, 0));
+        // this.map.initRandomChunk();
+        this.map.initStartChunk();
         // const ground = BABYLON.Mesh.CreateGround('ground', 5000, 5000, 250, this);
         // ground.position.y = -10;
         // ground.material = new BABYLON.StandardMaterial('ground', this);
@@ -146,15 +147,20 @@ export class MotionScene extends (<INewable> BABYLON.Scene) {
     }
 
     public onMapEnds(): void {
-        let position = this.player.getCurrentPosition();
-        // console.log(position);
-        const map_end = position.z - this.last_position;
-        // console.log(map_end);
-
+        let shipPosition = this.player.getCurrentPosition();
+        // let blockPosition = this.map.currentChunkPos;
+        // console.log(shipPosition);
+        const map_end = shipPosition.z - this.last_position;
         if (map_end > 300) {
-            console.log(position);
-            (<any> this).emitEvent({type: EventType.MAP_ENDS, data: position});
-            this.last_position = position.z;
+            let potentialArea = {
+                leftDown: {x: shipPosition.x - this.map.potentialArea.side / 2,
+                    z: shipPosition.z,},
+                rightTop: {x: shipPosition.x + this.map.potentialArea.side / 2,
+                    z: shipPosition.z + this.map.potentialArea.front,},
+            };
+            console.log(potentialArea);
+            (<any> this).emitEvent({type: EventType.MAP_ENDS, data: potentialArea});
+            this.last_position = shipPosition.z;
         }
     }
 

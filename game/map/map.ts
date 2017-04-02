@@ -20,10 +20,10 @@ export class Map extends (<INewable> BABYLON.Mesh) {
         this.scene = scene;
 
         this.loadChunks();
-        this._potentialArea = {side: 300, front: 600,};
+        this._potentialArea = {side: 600, front: 600,};
 
         JSWorks.EventManager.subscribe(this, this.scene, EventType.MAP_ENDS,
-            (event, emiter) => { this.initRandomChunk(scene.getPlayer().getCurrentPosition()); })
+            (event, emiter) => { this.initRandomChunk(event.data); })
     }
 
     public getScene(): MotionScene {
@@ -32,18 +32,42 @@ export class Map extends (<INewable> BABYLON.Mesh) {
 
     public loadChunks(): void {
         this.chunks = [
-            new Chunk("green", this.scene, this.chunkSize.width, this.chunkSize.height),
-            new Chunk("red", this.scene, this.chunkSize.width, this.chunkSize.height),
             new Chunk("blue", this.scene, this.chunkSize.width, this.chunkSize.height),
+            new Chunk("red", this.scene, this.chunkSize.width, this.chunkSize.height),
             new Chunk("green", this.scene, this.chunkSize.width, this.chunkSize.height),
             new Chunk("red", this.scene, this.chunkSize.width, this.chunkSize.height),
+            new Chunk("green", this.scene, this.chunkSize.width, this.chunkSize.height),
             new Chunk("blue", this.scene, this.chunkSize.width, this.chunkSize.height),
         ];
     }
 
-    public initRandomChunk(position: any): void {
-        const randomNum = Math.round(Math.random() * this.chunks.length);
-        this.chunks[randomNum].init( {x: position.x, y: position.y, z: position.z,} );
+    public initRandomChunk(position: {leftDown: {x: number, z:number}, rightTop:{x:number,z:number}}): void {
+
+
+        // const temp = Math.round(position.leftDown.x / this.chunkSize.width) * this.chunkSize.width + this.chunkSize.width / 2;
+        for (let z = Math.round(position.rightTop.z / this.chunkSize.height) * this.chunkSize.height + this.chunkSize.height / 2;
+             z >= position.leftDown.z; z -= this.chunkSize.height) {
+
+            for (let x = Math.round(position.leftDown.x / this.chunkSize.width) * this.chunkSize.width;
+                 x <= position.rightTop.x; x += this.chunkSize.width) {
+
+                    const currentChunkPos = {x: x, z: z };
+                    const temp1 = Math.round(position.rightTop.z / this.chunkSize.height) * this.chunkSize.height;
+                    console.log(temp1);
+                // debugger;
+                    console.log(currentChunkPos);
+                    this.chunks[this.counter].init(currentChunkPos);
+                    this.counter = (this.counter + 1) % this.chunks.length;
+
+            }
+
+        }
+    }
+
+    public initStartChunk() {
+        this.initRandomChunk({leftDown: {x: -this._potentialArea.side / 2, z: 0},
+            rightTop: {x: this._potentialArea.side / 2, z: this._potentialArea.front}});
+        this.counter = 3;
     }
 
     get potentialArea(): { side: number; front: number } {

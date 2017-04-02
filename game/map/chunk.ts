@@ -18,7 +18,7 @@ export class Chunk extends (<INewable> BABYLON.Mesh) {
         this.scene = scene;
         this.width = widht;
         this.height = height;
-        this.ground = BABYLON.Mesh.CreateGround('ground', this.width, this.height, 250, this.scene)
+        this.ground = BABYLON.Mesh.CreateGround('ground', this.width, this.height, 100, this.scene)
         this.ground.position.z = -1000;
         this.ground.material = new BABYLON.StandardMaterial('ground', this.scene);
         if (this.name === "red") {
@@ -37,7 +37,7 @@ export class Chunk extends (<INewable> BABYLON.Mesh) {
         return this.scene;
     }
 
-    public init(position: {x: number, y: number, z: number}) {
+    public init(position: {x: number, z: number}) {
         this.ground.position.x = position.x;
         this.ground.position.z = position.z;
         this.ground.position.y = -10;
