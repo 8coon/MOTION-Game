@@ -150,7 +150,8 @@ export class MotionScene extends (<INewable> BABYLON.Scene) {
         // console.log(position);
         const map_end = position.z - this.last_position;
         // console.log(map_end);
-        if (map_end > 120) {
+
+        if (map_end > 300) {
             console.log(position);
             (<any> this).emitEvent({type: EventType.MAP_ENDS, data: position});
             this.last_position = position.z;
