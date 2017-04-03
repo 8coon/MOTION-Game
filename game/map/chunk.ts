@@ -1,7 +1,6 @@
-
-
 import {INewable} from "../common/INewable";
 import {MotionScene} from "../scenes/scene";
+
 declare const BABYLON;
 declare const JSWorks;
 
@@ -9,6 +8,8 @@ export class Chunk extends (<INewable> BABYLON.Mesh) {
 
     private scene: MotionScene;
     public ground: any;
+
+    public isActive: boolean = false;
 
     private height: number = 300;
     private width: number = 300;
@@ -18,7 +19,7 @@ export class Chunk extends (<INewable> BABYLON.Mesh) {
         this.scene = scene;
         this.width = widht;
         this.height = height;
-        this.ground = BABYLON.Mesh.CreateGround('ground', this.width, this.height, 50, this.scene)
+        this.ground = BABYLON.Mesh.CreateGround('ground', this.width, this.height, 50, this.scene);
         this.ground.position.z = -1000;
         this.ground.material = new BABYLON.StandardMaterial('ground', this.scene);
         if (this.name === "red") {
@@ -37,13 +38,56 @@ export class Chunk extends (<INewable> BABYLON.Mesh) {
         return this.scene;
     }
 
-    public init(position: {x: number, z: number}) {
+    public init(position: { x: number, z: number }) {
         this.ground.position.x = position.x;
         this.ground.position.z = position.z;
         this.ground.position.y = -10;
+        this.isActive = true;
     }
 
-    public getSize(): {h: number, w: number} {
+    public getSize(): { h: number, w: number } {
         return {h: this.height, w: this.width};
     }
+
+    public getBorder(): { leftDown: { x: number, z: number }, rightTop: { x: number, z: number } } {
+        const halfWidth = this.width / 2;
+        const halfHeight = this.height / 2;
+        return {
+            leftDown: {x: this.ground.position.x - halfWidth, z: this.ground.position.z - halfHeight},
+            rightTop: {x: this.ground.position.x + halfWidth, z: this.ground.position.z + halfHeight}
+        };
+    }
+
+    public inArea(pos: any): boolean {
+        const border = this.getBorder();
+        return (border.leftDown.x <= pos.x) && (pos.x <= border.rightTop.x) && (pos.z >= border.leftDown.z)
+            && (pos.z <= border.rightTop.z);
+    }
+
+    public isSeeable(area: any): boolean {
+        const border = this.getBorder();
+        console.log(border, area);
+        return (border.rightTop.z >= area.leftDown.z) && (area.rightTop.x >= border.rightTop.x) && (area.leftDown.x <= border.leftDown.x)
+            // (border.rightTop.x <= area.rightTop.x);
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }

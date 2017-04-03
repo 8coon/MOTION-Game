@@ -37,16 +37,22 @@ export class MotionScene extends (<INewable> BABYLON.Scene) {
         this.bulletManager = new BulletManager(this);
         this.map = new Map('motion-map', this);
         // this.last_position = - this.map.chunkSize.height / 2;
-        this.last_position =0 ;
+        this.last_position = 0;
         console.log("last", this.last_position);
 
         JSWorks.EventManager.subscribe(this, this, EventType.JOYSTICK_MOVE,
-            (event, emitter) => { this.currentInput.joystickMoved(event.data.x, event.data.y); });
+            (event, emitter) => {
+                this.currentInput.joystickMoved(event.data.x, event.data.y);
+            });
         JSWorks.EventManager.subscribe(this, this, EventType.JOYSTICK_PRESS,
-            (event, emitter) => { this.currentInput.joystickPressed(); });
+            (event, emitter) => {
+                this.currentInput.joystickPressed();
+            });
 
         JSWorks.EventManager.subscribe(this, this, EventType.RENDER,
-            (event, emiter) => { this.onMapEnds(); });
+            (event, emiter) => {
+                this.onMapEnds();
+            });
     }
 
 
@@ -64,7 +70,9 @@ export class MotionScene extends (<INewable> BABYLON.Scene) {
         };
 
         JSWorks.EventManager.subscribe(this, this.meshesLoader, EventType.LOAD_SUCCESS,
-            () => { this.onLoaderSuccess(); })
+            () => {
+                this.onLoaderSuccess();
+            })
     }
 
 
@@ -82,7 +90,9 @@ export class MotionScene extends (<INewable> BABYLON.Scene) {
         };
 
         JSWorks.EventManager.subscribe(this, this.shadersLoader, EventType.LOAD_SUCCESS,
-            () => { this.onLoaderSuccess(); })
+            () => {
+                this.onLoaderSuccess();
+            })
     }
 
 
@@ -91,7 +101,7 @@ export class MotionScene extends (<INewable> BABYLON.Scene) {
 
         if (this.loadersCount === this.loadersFired) {
             [EventType.MESHES_LOAD, EventType.SHADERS_LOAD].forEach((type) => {
-                (<any> this).emitEvent({ type: type });
+                (<any> this).emitEvent({type: type});
             });
 
             this.run();
@@ -140,7 +150,7 @@ export class MotionScene extends (<INewable> BABYLON.Scene) {
         });
 
         (<any> this).getEngine().runRenderLoop(() => {
-            (<any> this).emitEvent({ type: EventType.RENDER });
+            (<any> this).emitEvent({type: EventType.RENDER});
             (<any> this).render();
         });
     }
@@ -152,20 +162,30 @@ export class MotionScene extends (<INewable> BABYLON.Scene) {
 
     public onMapEnds(): void {
         let shipPosition = this.player.getCurrentPosition();
-        console.log(shipPosition);
-        const map_end = shipPosition.z - this.last_position;
+        // console.log(shipPosition);
+
+        // const map_end = shipPosition.z - this.last_position;
         // console.log(map_end);
         // console.log(this.map.lastBlock)
-        if (map_end > this.map.chunkSize.height) {
-            let potentialArea = {
-                leftDown: {x: shipPosition.x - this.map.potentialArea.side / 2,
-                    z: shipPosition.z,},
-                rightTop: {x: shipPosition.x + this.map.potentialArea.side / 2,
-                    z: shipPosition.z + this.map.potentialArea.front,},
+
+        const border = this.map.activeChunk.getBorder();
+        if ((shipPosition.z >= border.rightTop.z) || (shipPosition.x <= border.leftDown.x) ||
+            (shipPosition.x >= border.rightTop.x)) {
+
+            const potentialArea = {
+                leftDown: {
+                    x: shipPosition.x - this.map.potentialArea.side / 2,
+                    z: shipPosition.z - 10,
+                },
+                rightTop: {
+                    x: shipPosition.x + this.map.potentialArea.side / 2,
+                    z: shipPosition.z + this.map.potentialArea.front,
+                },
             };
-            console.log(potentialArea);
-            (<any> this).emitEvent({type: EventType.MAP_ENDS, data: potentialArea});
-            this.last_position = shipPosition.z;
+
+
+            // console.log(potentialArea);
+            (<any> this).emitEvent({type: EventType.MAP_ENDS, data: {visibleArea: potentialArea, shipPosition: shipPosition}});
         }
     }
 
