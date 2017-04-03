@@ -13,7 +13,6 @@ export class Map extends (<INewable> BABYLON.Mesh) {
     private counter: number = 0;
     private _potentialArea: { side: number, front: number, };
     public chunkSize: { width: number, height: number, } = {width: 200, height: 200,};
-    // private renderedChunks: Chunk[] = [];
     private _activeChunk: Chunk;
     private visibleArea: { leftDown: { x: number, z: number }, rightTop: { x: number, z: number } };
 
@@ -86,7 +85,7 @@ export class Map extends (<INewable> BABYLON.Mesh) {
      * @param start флаг, помечающий то, что это начальная инициализация
      */
     public arrangeChunks(visibleArea: { leftDown: { x: number, z: number }, rightTop: { x: number, z: number } },
-                         start:boolean): void {
+                         start: boolean): void {
 
         for (let z = Math.round(visibleArea.rightTop.z / this.chunkSize.height) * this.chunkSize.height;
              z >= visibleArea.leftDown.z; z -= this.chunkSize.height) {
@@ -165,7 +164,4 @@ export class Map extends (<INewable> BABYLON.Mesh) {
         return (this.visibleArea.leftDown.z < pos.z) && (this.visibleArea.leftDown.x < pos.x)
             && (this.visibleArea.rightTop.z > pos.z) && (this.visibleArea.rightTop.x > pos.x);
     }
-
-
-
 }
