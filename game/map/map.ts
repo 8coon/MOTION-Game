@@ -15,7 +15,6 @@ export class Map extends (<INewable> BABYLON.Mesh) {
     public chunkSize: { width: number, height: number, } = {width: 200, height: 200,};
     // private renderedChunks: Chunk[] = [];
     private _activeChunk: Chunk;
-    private visibleChunks: number[] = [];
     private visibleArea: { leftDown: { x: number, z: number }, rightTop: { x: number, z: number } };
 
     constructor(name: string, scene: MotionScene) {
@@ -26,19 +25,19 @@ export class Map extends (<INewable> BABYLON.Mesh) {
         this._potentialArea = {side: 400, front: 500,};
 
         JSWorks.EventManager.subscribe(this, this.scene, EventType.MAP_ENDS,
-            (event, emiter) => {
+            (event, emitter) => {
 
-                // console.log(event.data.potentialArea);
-                // console.log(this.visibleChunks);
+                // провеяем какие блоки сейчас активны(попадают в прямоугольник видимости)
                 this.chunks.forEach(chunk => {
                     if (!chunk.isSeeable(event.data.visibleArea)) {
                         chunk.isActive = false;
                     }
                 });
-                console.log(this.visibleChunks);
 
-                this.initRandomChunk(event.data.visibleArea, false);
+                this.arrangeChunks(event.data.visibleArea, false);
 
+                // определяем текущий активный блок (этот параметр использует сцена, для того чтобы запускать событие
+                // MAP_ENDS
                 const pos = event.data.shipPosition;
                 this.chunks.forEach(chunk => {
                     if (chunk.inArea(pos)) {
@@ -55,6 +54,9 @@ export class Map extends (<INewable> BABYLON.Mesh) {
         return this.scene;
     }
 
+    /**
+     * загрузить блоки
+     */
     public loadChunks(): void {
         this.chunks = [
             new Chunk("blue", this.scene, this.chunkSize.width, this.chunkSize.height),
@@ -78,45 +80,52 @@ export class Map extends (<INewable> BABYLON.Mesh) {
         ];
     }
 
-    public initRandomChunk(position: { leftDown: { x: number, z: number }, rightTop: { x: number, z: number } }, start:boolean): void {
+    /**
+     * проход по прямоугольной бласти и рендеринг блоков в ней
+     * @param visibleArea область, в которой необходимо иметь блоки
+     * @param start флаг, помечающий то, что это начальная инициализация
+     */
+    public arrangeChunks(visibleArea: { leftDown: { x: number, z: number }, rightTop: { x: number, z: number } },
+                         start:boolean): void {
 
-        //проход по прямоугольной бласти и рендеринг блоков в ней
-        // const newVisibleArea = this.visibleArea;
-        for (let z = Math.round(position.rightTop.z / this.chunkSize.height) * this.chunkSize.height;
-             z >= position.leftDown.z; z -= this.chunkSize.height) {
+        for (let z = Math.round(visibleArea.rightTop.z / this.chunkSize.height) * this.chunkSize.height;
+             z >= visibleArea.leftDown.z; z -= this.chunkSize.height) {
 
-            for (let x = Math.round(position.leftDown.x / this.chunkSize.width) * this.chunkSize.width;
-                 x <= position.rightTop.x; x += this.chunkSize.width) {
-                // console.log(this.visibleChunks);
-                // debugger;
-
-
-                console.log("x", x);
+            for (let x = Math.round(visibleArea.leftDown.x / this.chunkSize.width) * this.chunkSize.width;
+                 x <= visibleArea.rightTop.x; x += this.chunkSize.width) {
                 const currentChunkPos = {x: x, z: z};
+
+                // проверка рендерили мы уже область или нет, если да переходим к следующуей итерации
                 if (!start && this.isRendered(currentChunkPos)) {
-                    console.log("eee");
+                    // console.log("eee");
                     continue;
                 }
-                // console.log(currentChunkPos);
+
+                // ищем не активный блок
                 for (let i = 0; i < this.chunks.length && this.chunks[this.counter].isActive; i++) {
                     this.counter = (this.counter + 1) % this.chunks.length;
                 }
+
+                // ставим его в currentChunkPos
                 this.chunks[this.counter].init(currentChunkPos);
                 this.counter = (this.counter + 1) % this.chunks.length;
             }
 
         }
-        this.visibleArea = position;
-        console.log(this.visibleArea);
+        // обновляем область видимости
+        this.visibleArea = visibleArea;
     }
 
-    public initStartChunk() {
+    /**
+     * инициализация стартовых блоков
+     */
+    public initStartChunks() {
         this.visibleArea = {
             leftDown: {x: 0, z: 0},
             rightTop: {x: 0, z: 0}
         };
 
-        this.initRandomChunk({
+        this.arrangeChunks({
             leftDown: {x: -this._potentialArea.side / 2, z: 0},
             rightTop: {x: this._potentialArea.side / 2, z: this._potentialArea.front}
         }, true);
@@ -147,6 +156,11 @@ export class Map extends (<INewable> BABYLON.Mesh) {
         this._activeChunk = value;
     }
 
+    /**
+     * проверка на то, рендерилась текущая точка(т.е. находится ли она в текущей зоне видимости)
+     * @param pos координаты точки
+     * @returns {boolean} true если находится
+     */
     public isRendered(pos: { x: number, z: number }): boolean {
         return (this.visibleArea.leftDown.z < pos.z) && (this.visibleArea.leftDown.x < pos.x)
             && (this.visibleArea.rightTop.z > pos.z) && (this.visibleArea.rightTop.x > pos.x);

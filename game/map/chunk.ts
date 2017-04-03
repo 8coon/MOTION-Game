@@ -64,6 +64,11 @@ export class Chunk extends (<INewable> BABYLON.Mesh) {
             && (pos.z <= border.rightTop.z);
     }
 
+    /**
+     * метод проверки входит ли блок в зону видимости
+     * @param area
+     * @returns {boolean}
+     */
     public isSeeable(area: any): boolean {
         const border = this.getBorder();
         console.log(border, area);

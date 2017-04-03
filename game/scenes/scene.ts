@@ -123,7 +123,7 @@ export class MotionScene extends (<INewable> BABYLON.Scene) {
 
         this.map.loadChunks();
         // this.map.initRandomChunk();
-        this.map.initStartChunk();
+        this.map.initStartChunks();
         // this.last_position = - this.map.chunkSize.height / 2;
         // const ground = BABYLON.Mesh.CreateGround('ground', 5000, 5000, 250, this);
         // ground.position.y = -10;
@@ -160,14 +160,11 @@ export class MotionScene extends (<INewable> BABYLON.Scene) {
         return `${parentName}__${name}`;
     }
 
+    /**
+     * метод проверки долетел ли игрок на край текущего блока, если да эмиттим событие MAP_ENDS
+     */
     public onMapEnds(): void {
-        let shipPosition = this.player.getCurrentPosition();
-        // console.log(shipPosition);
-
-        // const map_end = shipPosition.z - this.last_position;
-        // console.log(map_end);
-        // console.log(this.map.lastBlock)
-
+        const shipPosition = this.player.getCurrentPosition();
         const border = this.map.activeChunk.getBorder();
         if ((shipPosition.z >= border.rightTop.z) || (shipPosition.x <= border.leftDown.x) ||
             (shipPosition.x >= border.rightTop.x)) {
@@ -182,9 +179,6 @@ export class MotionScene extends (<INewable> BABYLON.Scene) {
                     z: shipPosition.z + this.map.potentialArea.front,
                 },
             };
-
-
-            // console.log(potentialArea);
             (<any> this).emitEvent({type: EventType.MAP_ENDS, data: {visibleArea: potentialArea, shipPosition: shipPosition}});
         }
     }
