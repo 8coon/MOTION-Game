@@ -71,7 +71,6 @@ export class Chunk extends (<INewable> BABYLON.Mesh) {
      */
     public isSeeable(area: any): boolean {
         const border = this.getBorder();
-        console.log(border, area);
         return (border.rightTop.z >= area.leftDown.z) && (area.rightTop.x >= border.rightTop.x) && (area.leftDown.x <= border.leftDown.x)
         // (border.rightTop.x <= area.rightTop.x);
     }

@@ -21,7 +21,7 @@ export class Map extends (<INewable> BABYLON.Mesh) {
         this.scene = scene;
 
         this.loadChunks();
-        this._potentialArea = {side: 400, front: 500,};
+        this._potentialArea = {side: 400, front: 300,};
 
         JSWorks.EventManager.subscribe(this, this.scene, EventType.MAP_ENDS,
             (event, emitter) => {
