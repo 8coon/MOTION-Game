@@ -3,25 +3,29 @@ import {MotionScene} from "../scenes/scene";
 import {Chunk} from "./chunk";
 import {EventType} from "../common/EventType";
 
+
 declare const BABYLON;
 declare const JSWorks;
 
+
 export class Map extends (<INewable> BABYLON.Mesh) {
+
 
     private chunks: Chunk[];
     private scene: MotionScene;
     private counter: number = 0;
     private _potentialArea: { side: number, front: number, };
-    public chunkSize: { width: number, height: number, } = {width: 200, height: 200,};
+    public chunkSize: { width: number, height: number, } = {width: 2000, height: 2000,};
     private _activeChunk: Chunk;
     private visibleArea: { leftDown: { x: number, z: number }, rightTop: { x: number, z: number } };
+
 
     constructor(name: string, scene: MotionScene) {
         super(name, scene);
         this.scene = scene;
 
         this.loadChunks();
-        this._potentialArea = {side: 400, front: 300,};
+        this._potentialArea = {side: 6500, front: 3000,};
 
         JSWorks.EventManager.subscribe(this, this.scene, EventType.MAP_ENDS,
             (event, emitter) => {
@@ -49,34 +53,25 @@ export class Map extends (<INewable> BABYLON.Mesh) {
         )
     }
 
+
     public getScene(): MotionScene {
         return this.scene;
     }
+
 
     /**
      * загрузить блоки
      */
     public loadChunks(): void {
-        this.chunks = [
-            new Chunk("blue", this.scene, this.chunkSize.width, this.chunkSize.height),
-            new Chunk("red", this.scene, this.chunkSize.width, this.chunkSize.height),
-            new Chunk("green", this.scene, this.chunkSize.width, this.chunkSize.height),
-            new Chunk("red", this.scene, this.chunkSize.width, this.chunkSize.height),
-            new Chunk("green", this.scene, this.chunkSize.width, this.chunkSize.height),
-            new Chunk("blue", this.scene, this.chunkSize.width, this.chunkSize.height),
-            new Chunk("green", this.scene, this.chunkSize.width, this.chunkSize.height),
-            new Chunk("red", this.scene, this.chunkSize.width, this.chunkSize.height),
-            new Chunk("green", this.scene, this.chunkSize.width, this.chunkSize.height),
-            new Chunk("green", this.scene, this.chunkSize.width, this.chunkSize.height),
-            new Chunk("red", this.scene, this.chunkSize.width, this.chunkSize.height),
-            new Chunk("green", this.scene, this.chunkSize.width, this.chunkSize.height),
-            new Chunk("blue", this.scene, this.chunkSize.width, this.chunkSize.height),
-            new Chunk("green", this.scene, this.chunkSize.width, this.chunkSize.height),
-            new Chunk("red", this.scene, this.chunkSize.width, this.chunkSize.height),
-            new Chunk("green", this.scene, this.chunkSize.width, this.chunkSize.height),
-            new Chunk("blue", this.scene, this.chunkSize.width, this.chunkSize.height),
-            new Chunk("red", this.scene, this.chunkSize.width, this.chunkSize.height),
-        ];
+        this.chunks = [];
+        const colors = ['red', 'green', 'blue'];
+
+        for (let i = 0; i < 32; i++) {
+            const name = colors[Math.floor(Math.random() * colors.length)];
+            const chunk = new Chunk(name, this.scene, this.chunkSize.width, this.chunkSize.height);
+
+            this.chunks.push(chunk);
+        }
     }
 
     /**
@@ -87,10 +82,10 @@ export class Map extends (<INewable> BABYLON.Mesh) {
     public arrangeChunks(visibleArea: { leftDown: { x: number, z: number }, rightTop: { x: number, z: number } },
                          start: boolean): void {
 
-        for (let z = Math.round(visibleArea.rightTop.z / this.chunkSize.height) * this.chunkSize.height;
+        for (let z = Math.floor(visibleArea.rightTop.z / this.chunkSize.height + 1) * this.chunkSize.height;
              z >= visibleArea.leftDown.z; z -= this.chunkSize.height) {
 
-            for (let x = Math.round(visibleArea.leftDown.x / this.chunkSize.width) * this.chunkSize.width;
+            for (let x = Math.floor(visibleArea.leftDown.x / this.chunkSize.width + 1) * this.chunkSize.width;
                  x <= visibleArea.rightTop.x; x += this.chunkSize.width) {
                 const currentChunkPos = {x: x, z: z};
 
@@ -114,6 +109,7 @@ export class Map extends (<INewable> BABYLON.Mesh) {
         // обновляем область видимости
         this.visibleArea = visibleArea;
     }
+
 
     /**
      * инициализация стартовых блоков
@@ -139,21 +135,26 @@ export class Map extends (<INewable> BABYLON.Mesh) {
 
     }
 
+
     get potentialArea(): { side: number; front: number } {
         return this._potentialArea;
     }
+
 
     set potentialArea(value: { side: number; front: number }) {
         this._potentialArea = value;
     }
 
+
     get activeChunk(): Chunk {
         return this._activeChunk;
     }
 
+
     set activeChunk(value: Chunk) {
         this._activeChunk = value;
     }
+
 
     /**
      * проверка на то, рендерилась текущая точка(т.е. находится ли она в текущей зоне видимости)
@@ -164,4 +165,5 @@ export class Map extends (<INewable> BABYLON.Mesh) {
         return (this.visibleArea.leftDown.z < pos.z) && (this.visibleArea.leftDown.x < pos.x)
             && (this.visibleArea.rightTop.z > pos.z) && (this.visibleArea.rightTop.x > pos.x);
     }
+
 }

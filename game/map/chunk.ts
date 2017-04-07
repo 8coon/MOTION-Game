@@ -11,8 +11,8 @@ export class Chunk extends (<INewable> BABYLON.Mesh) {
 
     public isActive: boolean = false;
 
-    private height: number = 300;
-    private width: number = 300;
+    private height: number;
+    private width: number;
 
     constructor(name: string, scene: MotionScene, widht, height) {
         super(name, scene);

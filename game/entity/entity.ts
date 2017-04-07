@@ -19,7 +19,7 @@ export class Entity extends (<INewable> BABYLON.Mesh) implements IControllable {
     public joystick: any;
     public target: any;
 
-    public speed: number = 0.2;
+    public speed: number = 0.4;
 
     private angleX: number = 0;
     private angleY: number = 0;
